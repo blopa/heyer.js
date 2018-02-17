@@ -1,1 +1,6 @@
-console.log('hello world');
+export default class Heyer {
+    constructor() {
+        this.name = 'Dog';
+    }
+}
+

@@ -11,14 +11,16 @@ var config = {
         publicPath: '/'
     },
     module: {
-        loaders: [
+        rules: [
             {
-                test: /\.js?/,
-                include: SRC_DIR,
+                test: /(\.jsx|\.js)$/,
                 loader: 'babel-loader',
-                query: {
-                    presets: ['react', 'es2015', 'stage-2']
-                }
+                exclude: /(node_modules|bower_components)/
+            },
+            {
+                test: /(\.jsx|\.js)$/,
+                loader: 'eslint-loader',
+                exclude: /node_modules/
             }
         ]
     }
