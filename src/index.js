@@ -120,7 +120,7 @@
     };
 
     var getModelData = function (modelName) {
-        return Heyer.instance.models[modelName];
+        return cloneObject(Heyer.instance.models[modelName]);
     };
 
     var getDomValue = function (dom) {
@@ -288,7 +288,7 @@
 
                 for (let k in model.value) {
                     if (model.value.hasOwnProperty(k)) {
-                        let obj = JSON.parse(JSON.stringify(baseObj));
+                        let obj = cloneObject(baseObj);
 
                         obj.id = 'data-hr' + baseId + '-' + k;
                         obj.text = model.value[k];
@@ -301,8 +301,12 @@
         }
     };
 
+    var cloneObject = function (object) {
+        return JSON.parse(JSON.stringify(object));
+    };
+
     var setModelData = function (modelName, modelValue, updateDom = true) {
-        if (Heyer.instance.models[modelName]) {
+        if (Heyer.instance.models.hasOwnProperty(modelName)) {
             if (Heyer.instance.models[modelName].value !== modelValue) {
                 Heyer.instance.models[modelName].value = modelValue;
                 if (updateDom) {
@@ -379,7 +383,8 @@
     };
 
     var setData = function (dataName, dataValue, updateDom = true) {
-        if (Heyer.instance.data[dataName]) {
+        debugger;
+        if (Heyer.instance.data.hasOwnProperty(dataName)) {
             if (Heyer.instance.data[dataName] !== dataValue) {
                 Heyer.instance.data[dataName] = dataValue;
             }
@@ -390,7 +395,7 @@
     };
 
     var getData = function (dataName) {
-        return Heyer.instance.data[dataName];
+        return cloneObject(Heyer.instance.data[dataName]);
     };
 
     var initialize = function (heyerObject) {

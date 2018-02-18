@@ -12,10 +12,11 @@
     <body>
         <div id="app">
             <input type="checkbox" hr-model="myInput"/>
-            <ul>
+            <ul hr-if="">
                 <li hr-loop="(value, key) in list">{{}}</li>
             </ul>
-            <button hr-onclick="sayHello">Click!</button>
+            <button hr-onclick="addItem">Add Item!</button>
+            <button hr-onclick="sayHello">Say Hello!</button>
         </div>
         <script src="/heyer.js"></script>
         <script type="text/javascript">
@@ -27,11 +28,20 @@
                 },
                 data: {
                     text: 'Hello World',
+                    index: 0,
                 },
                 functions: {
                     sayHello: function () {
                         window.alert('Hello!');
                     },
+                    addItem: function () {
+                        var arr = Heyer.getModelData('list').value;
+                        var index = Heyer.getData('index');
+                        arr.push('Item ' + index);
+                        index++;
+                        Heyer.setModelData('list', arr);
+                        Heyer.setData('index', index);
+                    }
                 },
                 created: function () {
                     Heyer.setModelData('list', ['Item A', 'Item B', 'Item C', 'Item D', 'Item E', 'Item F', 'Item G', 'Item H']);
