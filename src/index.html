@@ -15,7 +15,7 @@
             <input type="checkbox" hr-model="myInput"/>
             <label>Show / Hide</label>
             <ul hr-if="myInput">
-                <li hr-loop="(value, key) in list">{{}}</li>
+                <li hr-loop="(value, key) in list">List -> {{value}}</li>
             </ul>
             <button hr-onclick="addItem">Add Item!</button>
             <button hr-onclick="sayHello">Say Hello!</button>

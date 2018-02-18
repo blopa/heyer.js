@@ -171,13 +171,18 @@
         return result;
     };
 
-    var buildLoop = function (virtualDom, model) {
+    var buildLoop = function (virtualDom, model, variables) {
         let query = document.querySelectorAll('[' + virtualDom.id + ']');
         let parent = query[0].parentNode;
         let arr = [];
+        // let varArr = [];
 
         for (let key in model.value) {
             if (model.value.hasOwnProperty(key)) {
+                // let varObj = {};
+
+                // varObj[variables[0]] = model.value[key];
+                // varObj[variables[1]] = key;
                 if (virtualDom.type === 'li') {
                     let obj = {};
 
@@ -186,7 +191,11 @@
                     obj.model = null;
                     obj.children = [];
                     obj.attr = virtualDom.attr;
-                    obj.text = model.value[key];
+                    debugger;
+                    let variable = '{{' + variables[0] + '}}';
+                    let re = new RegExp(variable, 'g');
+
+                    obj.text = virtualDom.text.replace(re, model.value[key]);
                     arr.push(obj);
                 }
             }
@@ -300,7 +309,7 @@
                 variables[i] = variables[i].trim();
             }
 
-            let arrObj = buildLoop(obj, model);
+            let arrObj = buildLoop(obj, model, variables);
 
             dom.removeAttribute('hr-loop');
             return arrObj;
