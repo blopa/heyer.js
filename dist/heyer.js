@@ -68,12 +68,11 @@
 /*!**********************!*\
   !*** ./src/index.js ***!
   \**********************/
-/*! exports provided: default */
+/*! dynamic exports provided */
 /*! all exports used */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-eval("Object.defineProperty(__webpack_exports__, \"__esModule\", { value: true });\nclass Heyer {\n    constructor() {\n        this.name = 'Dog';\n    }\n}\n/* harmony export (immutable) */ __webpack_exports__[\"default\"] = Heyer;\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiMC5qcyIsInNvdXJjZXMiOlsid2VicGFjazovLy9zcmMvaW5kZXguanM/MWZkZiJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZGVmYXVsdCBjbGFzcyBIZXllciB7XHJcbiAgICBjb25zdHJ1Y3RvcigpIHtcclxuICAgICAgICB0aGlzLm5hbWUgPSAnRG9nJztcclxuICAgIH1cclxufVxyXG5cclxuXG5cblxuLy8gV0VCUEFDSyBGT09URVIgLy9cbi8vIHNyYy9pbmRleC5qcyJdLCJtYXBwaW5ncyI6IkFBQUE7QUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUhBOzsiLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///0\n");
+eval("(function (global) {\n    var Heyer = function (heyerObject) {\n        return Heyer.init(heyerObject);\n    };\n\n    Heyer.prototype = {};\n\n    Heyer.init = function (heyerObject) {\n        console.log('hello world');\n    };\n\n    Heyer.init.prototype = Heyer.prototype;\n\n    global.Heyer = Heyer;\n})(window);//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiMC5qcyIsInNvdXJjZXMiOlsid2VicGFjazovLy9zcmMvaW5kZXguanM/MWZkZiJdLCJzb3VyY2VzQ29udGVudCI6WyIoZnVuY3Rpb24gKGdsb2JhbCkge1xyXG4gICAgdmFyIEhleWVyID0gZnVuY3Rpb24gKGhleWVyT2JqZWN0KSB7XHJcbiAgICAgICAgcmV0dXJuIEhleWVyLmluaXQoaGV5ZXJPYmplY3QpO1xyXG4gICAgfTtcclxuXHJcbiAgICBIZXllci5wcm90b3R5cGUgPSB7fTtcclxuXHJcbiAgICBIZXllci5pbml0ID0gZnVuY3Rpb24gKGhleWVyT2JqZWN0KSB7XHJcbiAgICAgICAgY29uc29sZS5sb2coJ2hlbGxvIHdvcmxkJyk7XHJcbiAgICB9O1xyXG5cclxuICAgIEhleWVyLmluaXQucHJvdG90eXBlID0gSGV5ZXIucHJvdG90eXBlO1xyXG5cclxuICAgIGdsb2JhbC5IZXllciA9IEhleWVyO1xyXG5cclxufSh3aW5kb3cpKTtcclxuXHJcblxuXG5cbi8vIFdFQlBBQ0sgRk9PVEVSIC8vXG4vLyBzcmMvaW5kZXguanMiXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSIsInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///0\n");
 
 /***/ })
 /******/ ]);
