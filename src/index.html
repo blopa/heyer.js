@@ -10,11 +10,27 @@
         <title>heyer.js</title>
     </head>
     <body>
-        <div id="app"></div>
+        <div id="app">
+            <input type="checkbox" />
+            <ul>
+                <li>Something</li>
+            </ul>
+        </div>
         <script src="/heyer.js"></script>
         <script type="text/javascript">
             Heyer({
-
+                el: '#app',
+                models: {
+                    input: true,
+                },
+                data: {
+                    text: 'Hello World',
+                },
+                functions: {
+                    sayHello: function () {
+                        window.alert('Hello!');
+                    },
+                },
             });
         </script>
     </body>
