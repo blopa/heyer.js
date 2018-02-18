@@ -196,10 +196,31 @@
         return arr;
     };
 
+    var getDomVariables = function (text) {
+        let domVariables = text.match(/{{\s*[\w.]+\s*}}/g);
+        let result = [];
+
+        if (domVariables) {
+            for (let k in domVariables) {
+                if (domVariables.hasOwnProperty(k)) {
+                    let variable = domVariables[k].replace(/[{{}}]/g, '').trim();
+
+                    result.push(variable);
+                }
+            }
+        }
+
+        return result;
+    };
+
     var domParser = function (dom) {
         let isValidTextType = function (type) {
             switch (type) {
                 case 'li':
+                    return true;
+                case 'p':
+                    return true;
+                case 'h1':
                     return true;
                 default:
                     return false;
@@ -217,7 +238,23 @@
         obj.text = '';
         obj.display = true;
         if (dom.innerText && isValidTextType(obj.type)) {
-            obj.text = dom.innerText;
+            obj.text = dom.innerText.replace(/  +/g, ' ');
+            let domVariables = getDomVariables(dom.innerText);
+
+            if (domVariables.length > 0) {
+                obj.text = obj.text.replace(/{{ /g, '{{').replace(/ }}/g, '}}');
+                for (let k in domVariables) {
+                    if (domVariables.hasOwnProperty(k)) {
+                        if (Heyer.instance.data.hasOwnProperty(domVariables[k])) {
+                            let variable = '{{' + domVariables[k] + '}}';
+                            let re = new RegExp(variable, 'g');
+
+                            obj.text = obj.text.replace(re, Heyer.instance.data[domVariables[k]]);
+                        }
+                    }
+                }
+                dom.innerText = obj.text;
+            }
         }
         if (dom.attributes.hasOwnProperty('hr-if')) {
             let model = Heyer.instance.models[dom.attributes['hr-if'].value];
@@ -407,7 +444,6 @@
     };
 
     var setData = function (dataName, dataValue, updateDom = true) {
-        debugger;
         if (Heyer.instance.data.hasOwnProperty(dataName)) {
             if (Heyer.instance.data[dataName] !== dataValue) {
                 Heyer.instance.data[dataName] = dataValue;
