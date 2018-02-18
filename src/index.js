@@ -218,13 +218,19 @@
         if (dom.innerText && isValidTextType(obj.type)) {
             obj.text = dom.innerText;
         }
+        if (dom.attributes['hr-onclick']) {
+            let funcName = dom.attributes['hr-onclick'].value;
+
+            dom.removeAttribute('hr-onclick');
+            addListener(dom, Heyer.instance[funcName]);
+        }
         if (dom.attributes['hr-model']) {
             let model = Heyer.instance.models[dom.attributes['hr-model'].value];
 
             model.id = id;
             obj.model = model;
             dom.removeAttribute('hr-model');
-            addListener(dom);
+            addListener(dom, changeListener);
             updateDomElement(id, model.value);
         }
         if (dom.className) {
@@ -326,10 +332,13 @@
         }
     };
 
-    var addListener = function (dom) {
+    var addListener = function (dom, fn) {
         switch (dom.localName) {
             case 'input':
-                dom.addEventListener('change', changeListener);
+                dom.addEventListener('change', fn);
+                break;
+            case 'button':
+                dom.addEventListener('click', fn);
                 break;
             default:
                 break;
@@ -412,11 +421,20 @@
         Heyer.instance.el = heyerObject.el;
         Heyer.instance.models = mapModels(heyerObject.models);
         Heyer.instance.data = heyerObject.data;
-        Heyer.instance.functions = heyerObject.functions;
+        // Heyer.instance.functions = heyerObject.functions;
         // let virtualDom = domParser(dom);
 
         // Heyer.instance.dom.old = virtualDom;
         // Heyer.instance.dom.new = JSON.parse(JSON.stringify(virtualDom));
+
+        for (let k in heyerObject.functions) {
+            if (heyerObject.functions.hasOwnProperty(k)) {
+                if (typeof heyerObject.functions[k] === 'function') {
+                    Heyer.instance[heyerObject.functions[k].name] = heyerObject.functions[k];
+                }
+            }
+        }
+
         let result = domParser(dom);
 
         if (result.length === 1) {
@@ -429,12 +447,14 @@
             }
         }
 
-        Heyer.setModelData('list', ['Item A', 'Item B', 'Item C', 'Item D', 'Item E', 'Item F', 'Item G', 'Item H']);
+        if (heyerObject.created) {
+            heyerObject.created();
+        }
+
         // debugger;
     };
 
     // attributes
-    Heyer.init = initialize;
     Heyer.prototype = {};
     Heyer.setData = setData;
     Heyer.getData = getData;
@@ -444,6 +464,7 @@
     Heyer.instance.dom = {};
     // Heyer.instance.dom.old = {};
     // Heyer.instance.dom.new = {};
+    Heyer.init = initialize;
     Heyer.init.prototype = Heyer.prototype;
 
     // attach Heyer to global scope
