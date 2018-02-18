@@ -9,32 +9,104 @@
         return 'data-hr' + Math.random().toString(36).replace('.', '');
     };
 
-    var updateDomElement = function (id, value) {
-        let query = document.querySelectorAll('[' + id + ']');
+    var getHeyerIdFromDomElement = function (dom) {
+        let result = null;
 
-        if (query.length === 1) {
-            let node = query[0];
-
-            if (node.localName === 'input') {
-                if (node.type === 'checkbox') {
-                    node.checked = value;
-                }
+        for (let k in dom.attributes) {
+            if (typeof dom.attributes[k] === 'function') {
+                continue;
+            }
+            if (dom.attributes[k].name.substr(0, 7) === 'data-hr') {
+                result = dom.attributes[k].name;
+                break;
             }
         }
+
+        return result;
     };
 
-    var setModelData = function (modelName, modelValue, updateDom = true) {
-        if (Heyer.instance.models[modelName]) {
-            if (Heyer.instance.models[modelName].value !== modelValue) {
-                Heyer.instance.models[modelName].value = modelValue;
-                if (updateDom) {
-                    updateDomElement(Heyer.instance.models[modelName].id, modelValue);
-                }
-            }
-            return true;
+    var createDomElement = function (dom, virtualDom) {
+        let el = document.createElement(virtualDom.type);
+
+        for (let k in virtualDom.attr) {
+            // todo
         }
 
-        return false;
+        el.setAttribute(virtualDom.id, '');
+        el.innerText = virtualDom.text;
+        dom.appendChild(el);
+    };
+
+    var updateDomElement = function (id, value) {
+
+        if (value instanceof Array) {
+            let k = 0;
+            let parent = document.querySelectorAll('[' + id + ']');
+
+            parent = parent[0];
+            let virtualEl = {};
+            let baseId = getHeyerIdFromDomElement(parent.children[0]);
+
+            baseId = baseId.substr(7, baseId.length);
+            baseId = baseId.split('-')[0];
+            let childId = 'data-hr' + baseId;
+
+            while (true) {
+                let query = document.querySelectorAll('[' + childId + '-' + k + ']');
+
+                if (Object.keys(virtualEl).length === 0) {
+                    virtualEl.type = query[0].localName;
+
+                    // virtualEl.id = baseId;
+                    virtualEl.model = null;
+                    virtualEl.children = [];
+                    virtualEl.attr = {};
+                    // virtualEl.text = value;
+
+                    if (query[0].className) {
+                        virtualEl.attr.class = query[0].className;
+                    }
+                }
+
+                if ((value[k] === undefined) && (query.length === 0)) {
+                    break;
+                }
+
+                if (query.length === 0) {
+                    let parentId = getHeyerIdFromDomElement(parent);
+                    let parentQuery = document.querySelectorAll('[' + parentId + ']');
+
+                    virtualEl.id = childId + '-' + k;
+                    virtualEl.text = value[k];
+                    createDomElement(parentQuery[0], virtualEl);
+                } else {
+                    if (parent === undefined) {
+                        parent = query[0].parentNode;
+                    }
+
+                    if (query[0].innerText !== value[k]) {
+                        query[0].innerText = value[k];
+                    }
+
+                    if (value[k] === undefined) {
+                        query[0].remove();
+                    }
+                }
+                k++;
+            }
+        } else {
+            let query = document.querySelectorAll('[' + id + ']');
+
+            if (query.length === 1) {
+                let node = query[0];
+
+                if (node.localName === 'input') {
+                    if (node.type === 'checkbox') {
+                        node.checked = value;
+                    }
+                }
+            }
+        }
     };
 
     var getModelData = function (modelName) {
@@ -51,31 +123,40 @@
         return null;
     };
 
-    var changeListener = function (event) {
-        Array.from(event.target.attributes).forEach(function (attr) {
-            if (attr.name.substr(0, 7) === 'data-hr') {
-                let models = Heyer.instance.models;
-
-                for (let key in models) {
-                     if (models[key].id === attr.name) {
-                         let value = getDomValue(event.target);
-
-                         setModelData(key, value, false);
-                         return;
-                     }
-                }
-            }
-        });
+    var createDomLoop = function (dom, arr) {
+        while (dom.firstChild) {
+            dom.removeChild(dom.firstChild);
+        }
+        for (let k in arr) {
+            createDomElement(dom, arr[k]);
+        }
     };
 
-    var addListener = function (dom) {
-        switch (dom.localName) {
-            case 'input':
-                dom.addEventListener('change', changeListener);
-                break;
-            default:
-                break;
+    var getVirtualElementById = function (id) {
+        // todo
+    };
+
+    var buildLoop = function (virtualDom, model) {
+        let query = document.querySelectorAll('[' + virtualDom.id + ']');
+        let parent = query[0].parentNode;
+        let arr = [];
+
+        for (let key in model.value) {
+            if (virtualDom.type === 'li') {
+                let obj = {};
+
+                obj.type = virtualDom.type; // .toLowerCase();
+                obj.id = virtualDom.id + '-' + key;
+                obj.model = null;
+                obj.children = [];
+                obj.attr = virtualDom.attr;
+                obj.text = model.value[key];
+                arr.push(obj);
+            }
         }
+
+        createDomLoop(parent, arr);
+        return arr;
     };
 
     var domParser = function (dom) {
@@ -94,6 +175,12 @@
         obj.type = dom.localName; // .toLowerCase();
         obj.id = id;
         obj.model = null;
+        obj.children = [];
+        obj.attr = {};
+        obj.text = '';
+        if (dom.innerText && isValidTextType(obj.type)) {
+            obj.text = dom.innerText;
+        }
         if (dom.attributes['hr-model']) {
             let model = Heyer.instance.models[dom.attributes['hr-model'].value];
 
@@ -103,22 +190,85 @@
             addListener(dom);
             updateDomElement(id, model.value);
         }
-        obj.attr = {};
         if (dom.className) {
             obj.attr.class = dom.className;
         }
-        obj.text = '';
-        if (dom.innerText && isValidTextType(obj.type)) {
-            obj.text = dom.innerText;
+        if (dom.attributes['hr-loop']) {
+            let loop = dom.attributes['hr-loop'].value;
+
+            loop = loop.replace(/[()]/g, ' ');
+            let params = loop.split(' in ');
+            let modelName = params[params.length - 1].trim();
+            let variables = params[0].split(',');
+            let model = Heyer.instance.models[modelName];
+
+            model.id = getHeyerIdFromDomElement(dom.parentNode);
+            for (let i = 0; i < variables.length; i++) {
+                variables[i] = variables[i].trim();
+            }
+
+            let arrObj = buildLoop(obj, model);
+
+            dom.removeAttribute('hr-loop');
+            return arrObj;
         }
-        obj.children = [];
         if (dom.children && dom.children.length) {
             Array.from(dom.children).forEach(function (child) {
-                obj.children.push(domParser(child));
+                let result = domParser(child);
+
+                for (let r in result) {
+                    obj.children.push(result[r]);
+                }
             });
         }
 
-        return obj;
+        return [obj];
+    };
+
+    var updateVirtualDomElement = function (id) {
+        debugger;
+        let query = document.querySelectorAll('[' + id + ']');
+
+        let virtualDom = domParser(query[0]);
+    };
+
+    var setModelData = function (modelName, modelValue, updateDom = true) {
+        if (Heyer.instance.models[modelName]) {
+            if (Heyer.instance.models[modelName].value !== modelValue) {
+                Heyer.instance.models[modelName].value = modelValue;
+                if (updateDom) {
+                    updateDomElement(Heyer.instance.models[modelName].id, modelValue);
+                    updateVirtualDomElement(Heyer.instance.models[modelName].id);
+                }
+            }
+            return true;
+        }
+
+        return false;
+    };
+
+    var changeListener = function (event) {
+        let id = getHeyerIdFromDomElement(event.target);
+        let models = Heyer.instance.models;
+
+        for (let key in models) {
+            if (models[key].id === id) {
+                let value = getDomValue(event.target);
+
+                setModelData(key, value, false);
+                return;
+            }
+        }
+    };
+
+    var addListener = function (dom) {
+        switch (dom.localName) {
+            case 'input':
+                dom.addEventListener('change', changeListener);
+                break;
+            default:
+                break;
+        }
     };
 
     var createElement = function (node) {
@@ -200,7 +350,17 @@
 
         // Heyer.instance.dom.old = virtualDom;
         // Heyer.instance.dom.new = JSON.parse(JSON.stringify(virtualDom));
-        Heyer.instance.dom = domParser(dom);
+        let result = domParser(dom);
+
+        if (result.length === 1) {
+            Heyer.instance.dom = result[0];
+        } else {
+            for (let r in result) {
+                Heyer.instance.dom.push(result[r]);
+            }
+        }
+
+        Heyer.setModelData('list', ['Item A', 'Item B', 'Item C', 'Item D', 'Item E', 'Item F', 'Item G', 'Item H']);
         // debugger;
     };
 

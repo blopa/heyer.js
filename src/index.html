@@ -11,9 +11,9 @@
     </head>
     <body>
         <div id="app">
-            <input type="checkbox" hr-model="input"/>
+            <input type="checkbox" hr-model="myInput"/>
             <ul>
-                <li>Something</li>
+                <li hr-loop="(value, key) in list">{{}}</li>
             </ul>
         </div>
         <script src="/heyer.js"></script>
@@ -21,7 +21,8 @@
             Heyer({
                 el: '#app',
                 models: {
-                    input: true,
+                    myInput: true,
+                    list: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'],
                 },
                 data: {
                     text: 'Hello World',
