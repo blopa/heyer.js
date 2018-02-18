@@ -9,16 +9,25 @@
         return 'data-hr' + Math.random().toString(36).replace('.', '');
     };
 
+    var getHeyerBaseIdLoopId = function (baseId) {
+        baseId = baseId.substr(7, baseId.length);
+        baseId = baseId.split('-')[0];
+
+        return baseId;
+    };
+
     var getHeyerIdFromDomElement = function (dom) {
         let result = null;
 
         for (let k in dom.attributes) {
-            if (typeof dom.attributes[k] === 'function') {
-                continue;
-            }
-            if (dom.attributes[k].name.substr(0, 7) === 'data-hr') {
-                result = dom.attributes[k].name;
-                break;
+            if (dom.attributes.hasOwnProperty(k)) {
+                if (typeof dom.attributes[k] === 'function') {
+                    continue;
+                }
+                if (dom.attributes[k].name.substr(0, 7) === 'data-hr') {
+                    result = dom.attributes[k].name;
+                    break;
+                }
             }
         }
 
@@ -29,7 +38,9 @@
         let el = document.createElement(virtualDom.type);
 
         for (let k in virtualDom.attr) {
-            // todo
+            if (virtualDom.attr.hasOwnProperty(k)) {
+                // todo
+            }
         }
 
         el.setAttribute(virtualDom.id, '');
@@ -47,8 +58,7 @@
             let virtualEl = {};
             let baseId = getHeyerIdFromDomElement(parent.children[0]);
 
-            baseId = baseId.substr(7, baseId.length);
-            baseId = baseId.split('-')[0];
+            baseId = getHeyerBaseIdLoopId(baseId);
             let childId = 'data-hr' + baseId;
 
             while (true) {
@@ -128,12 +138,37 @@
             dom.removeChild(dom.firstChild);
         }
         for (let k in arr) {
-            createDomElement(dom, arr[k]);
+            if (arr.hasOwnProperty(k)) {
+                createDomElement(dom, arr[k]);
+            }
         }
     };
 
-    var getVirtualElementById = function (id) {
-        // todo
+    var getVirtualElementById = function (id, dom) {
+        let result = null;
+
+        for (let k in dom) {
+            if (dom.hasOwnProperty(k)) {
+                if (dom.id === id) {
+                    result = dom;
+                    break;
+                } else if (dom.children.length > 0) {
+                    for (let key in dom.children) {
+                        if (dom.children.hasOwnProperty(key)) {
+                            result = getVirtualElementById(id, dom.children[key]);
+
+                            if (result) {
+                                if (result.id === id) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     };
 
     var buildLoop = function (virtualDom, model) {
@@ -142,16 +177,18 @@
         let arr = [];
 
         for (let key in model.value) {
-            if (virtualDom.type === 'li') {
-                let obj = {};
+            if (model.value.hasOwnProperty(key)) {
+                if (virtualDom.type === 'li') {
+                    let obj = {};
 
-                obj.type = virtualDom.type; // .toLowerCase();
-                obj.id = virtualDom.id + '-' + key;
-                obj.model = null;
-                obj.children = [];
-                obj.attr = virtualDom.attr;
-                obj.text = model.value[key];
-                arr.push(obj);
+                    obj.type = virtualDom.type; // .toLowerCase();
+                    obj.id = virtualDom.id + '-' + key;
+                    obj.model = null;
+                    obj.children = [];
+                    obj.attr = virtualDom.attr;
+                    obj.text = model.value[key];
+                    arr.push(obj);
+                }
             }
         }
 
@@ -217,7 +254,9 @@
                 let result = domParser(child);
 
                 for (let r in result) {
-                    obj.children.push(result[r]);
+                    if (result.hasOwnProperty(r)) {
+                        obj.children.push(result[r]);
+                    }
                 }
             });
         }
@@ -225,11 +264,35 @@
         return [obj];
     };
 
-    var updateVirtualDomElement = function (id) {
-        debugger;
-        let query = document.querySelectorAll('[' + id + ']');
+    var updateVirtualDomElement = function (model) {
+        let virtualEl = getVirtualElementById(model.id, Heyer.instance.dom);
 
-        let virtualDom = domParser(query[0]);
+        if (model.value instanceof Array) {
+            if (virtualEl.children.length > 0) {
+                let baseObj = {};
+                let baseId = getHeyerBaseIdLoopId(virtualEl.children[0].id);
+                let arr = [];
+
+                baseObj.type = virtualEl.children[0].type; // .toLowerCase();
+                baseObj.model = null;
+                baseObj.children = [];
+                // baseObj.id = baseId;
+                baseObj.attr = virtualEl.children[0].attr;
+                // baseObj.text = '';
+
+                for (let k in model.value) {
+                    if (model.value.hasOwnProperty(k)) {
+                        let obj = JSON.parse(JSON.stringify(baseObj));
+
+                        obj.id = 'data-hr' + baseId + '-' + k;
+                        obj.text = model.value[k];
+                        arr.push(obj);
+                    }
+                }
+
+                virtualEl.children = arr;
+            }
+        }
     };
 
     var setModelData = function (modelName, modelValue, updateDom = true) {
@@ -238,7 +301,7 @@
                 Heyer.instance.models[modelName].value = modelValue;
                 if (updateDom) {
                     updateDomElement(Heyer.instance.models[modelName].id, modelValue);
-                    updateVirtualDomElement(Heyer.instance.models[modelName].id);
+                    updateVirtualDomElement(Heyer.instance.models[modelName]);
                 }
             }
             return true;
@@ -252,11 +315,13 @@
         let models = Heyer.instance.models;
 
         for (let key in models) {
-            if (models[key].id === id) {
-                let value = getDomValue(event.target);
+            if (models.hasOwnProperty(key)) {
+                if (models[key].id === id) {
+                    let value = getDomValue(event.target);
 
-                setModelData(key, value, false);
-                return;
+                    setModelData(key, value, false);
+                    return;
+                }
             }
         }
     };
@@ -332,10 +397,12 @@
             let obj = {};
 
             for (let key in models) {
-                obj[key] = {
-                    value: models[key],
-                    id: ''
-                };
+                if (models.hasOwnProperty(key)) {
+                    obj[key] = {
+                        value: models[key],
+                        id: ''
+                    };
+                }
             }
 
             return obj;
@@ -356,7 +423,9 @@
             Heyer.instance.dom = result[0];
         } else {
             for (let r in result) {
-                Heyer.instance.dom.push(result[r]);
+                if (result.hasOwnProperty(r)) {
+                    Heyer.instance.dom.push(result[r]);
+                }
             }
         }
 
