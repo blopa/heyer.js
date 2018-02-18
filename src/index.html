@@ -11,8 +11,10 @@
     </head>
     <body>
         <div id="app">
+            <h1>{{text}}</h1>
             <input type="checkbox" hr-model="myInput"/>
-            <ul hr-if="">
+            <label>Show / Hide</label>
+            <ul hr-if="myInput">
                 <li hr-loop="(value, key) in list">{{}}</li>
             </ul>
             <button hr-onclick="addItem">Add Item!</button>
@@ -23,7 +25,8 @@
             Heyer({
                 el: '#app',
                 models: {
-                    myInput: true,
+                    show: false,
+                    myInput: false,
                     list: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'],
                 },
                 data: {

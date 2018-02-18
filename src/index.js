@@ -215,16 +215,29 @@
         obj.children = [];
         obj.attr = {};
         obj.text = '';
+        obj.display = true;
         if (dom.innerText && isValidTextType(obj.type)) {
             obj.text = dom.innerText;
         }
-        if (dom.attributes['hr-onclick']) {
+        if (dom.attributes.hasOwnProperty('hr-if')) {
+            let model = Heyer.instance.models[dom.attributes['hr-if'].value];
+
+            if (typeof (model.value) === typeof (true)) {
+                obj.display = model.value;
+                model.conditionalBlocks.push(id);
+                dom.hidden = !obj.display;
+            } else {
+                throw new Error('hr-if only works with boolean.');
+            }
+            dom.removeAttribute('hr-if');
+        }
+        if (dom.attributes.hasOwnProperty('hr-onclick')) {
             let funcName = dom.attributes['hr-onclick'].value;
 
             dom.removeAttribute('hr-onclick');
             addListener(dom, Heyer.instance[funcName]);
         }
-        if (dom.attributes['hr-model']) {
+        if (dom.attributes.hasOwnProperty('hr-model')) {
             let model = Heyer.instance.models[dom.attributes['hr-model'].value];
 
             model.id = id;
@@ -236,7 +249,7 @@
         if (dom.className) {
             obj.attr.class = dom.className;
         }
-        if (dom.attributes['hr-loop']) {
+        if (dom.attributes.hasOwnProperty('hr-loop')) {
             let loop = dom.attributes['hr-loop'].value;
 
             loop = loop.replace(/[()]/g, ' ');
@@ -307,11 +320,22 @@
 
     var setModelData = function (modelName, modelValue, updateDom = true) {
         if (Heyer.instance.models.hasOwnProperty(modelName)) {
-            if (Heyer.instance.models[modelName].value !== modelValue) {
-                Heyer.instance.models[modelName].value = modelValue;
+            let model = Heyer.instance.models[modelName];
+
+            if (model.value !== modelValue) {
+                model.value = modelValue;
+                if (model.conditionalBlocks.length > 0) {
+                    for (let k in model.conditionalBlocks) {
+                        if (model.conditionalBlocks.hasOwnProperty(k)) {
+                            let query = document.querySelectorAll('[' + model.conditionalBlocks[k] + ']');
+
+                            query[0].hidden = !modelValue;
+                        }
+                    }
+                }
                 if (updateDom) {
-                    updateDomElement(Heyer.instance.models[modelName].id, modelValue);
-                    updateVirtualDomElement(Heyer.instance.models[modelName]);
+                    updateDomElement(model.id, modelValue);
+                    updateVirtualDomElement(model);
                 }
             }
             return true;
@@ -414,7 +438,8 @@
                 if (models.hasOwnProperty(key)) {
                     obj[key] = {
                         value: models[key],
-                        id: ''
+                        id: '',
+                        conditionalBlocks: []
                     };
                 }
             }
