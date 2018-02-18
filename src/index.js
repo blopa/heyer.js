@@ -5,41 +5,41 @@
     };
 
     // functions
+    var generateId = function () {
+        return 'hr' + Math.random().toString(36).replace('.', '');
+    };
+
     var domParser = function (dom) {
-        let parser = function (root) {
-            let isValidTextType = function (type) {
-                switch (type) {
-                    case 'li':
-                        return true;
-                    default:
-                        return false;
-                }
-            };
-            let obj = {};
-
-            obj.type = root.nodeName.toLowerCase();
-            obj.attr = {};
-            if (root.className) {
-                obj.attr.class = root.className;
+        let isValidTextType = function (type) {
+            switch (type) {
+                case 'li':
+                    return true;
+                default:
+                    return false;
             }
-            obj.text = '';
-            if (root.innerText && isValidTextType(obj.type)) {
-                obj.text = root.innerText;
-            }
-            obj.children = [];
-            if (root.children && root.children.length) {
-                Array.from(root.children).forEach(function (child) {
-                    obj.children.push(parser(child));
-                });
-            }
-
-            return obj;
         };
+        let obj = {};
+        let id = generateId();
 
-        let virtualDom = parser(dom);
+        dom.setAttribute(id, '');
+        obj.type = dom.nodeName.toLowerCase();
+        obj.id = id;
+        obj.attr = {};
+        if (dom.className) {
+            obj.attr.class = dom.className;
+        }
+        obj.text = '';
+        if (dom.innerText && isValidTextType(obj.type)) {
+            obj.text = dom.innerText;
+        }
+        obj.children = [];
+        if (dom.children && dom.children.length) {
+            Array.from(dom.children).forEach(function (child) {
+                obj.children.push(domParser(child));
+            });
+        }
 
-        Heyer.dom.old = virtualDom;
-        Heyer.dom.new = virtualDom;
+        return obj;
     };
 
     var createElement = function (node) {
@@ -85,22 +85,27 @@
         //     created: {},
         // }
         let dom = document.querySelector(heyerObject.el);
+        let virtualDom = domParser(dom);
 
-        domParser(dom);
+        Heyer.instance.dom.old = virtualDom;
+        Heyer.instance.dom.new = JSON.parse(JSON.stringify(virtualDom));
+        Heyer.instance.el = heyerObject.el;
+        Heyer.instance.models = heyerObject.models;
+        Heyer.instance.data = heyerObject.data;
+        Heyer.instance.functions = heyerObject.functions;
         debugger;
     };
 
     // attributes
     Heyer.init = initialize;
-
     Heyer.prototype = {};
-
-    Heyer.dom = {};
-    Heyer.dom.old = {};
-    Heyer.dom.new = {};
-
+    Heyer.instance = {};
+    Heyer.instance.dom = {};
+    Heyer.instance.dom.old = {};
+    Heyer.instance.dom.new = {};
     Heyer.init.prototype = Heyer.prototype;
 
+    // attach Heyer to global scope
     global.Heyer = Heyer;
 
 }(window));
