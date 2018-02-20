@@ -1,7 +1,7 @@
-# heyer.js - HEY. er... js.  
+# heyer.js - HEY! er... js.  
 Made using https://github.com/blopa/base-webpack-library
 
-## About
+# About
 This project is a personal P.O.C. I made as I self-improvement for my Javascript skills. After using other Javascript libraries for so many years, I wanted to know if I was able to build one myself, even if just for some simple DOM manipulation.
 
 This P.O.C. was made in around 8 hours.
