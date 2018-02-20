@@ -41,7 +41,7 @@ Heyer({
     },
     created: function () {
         Heyer.instance.sayHello();
-        Heyer.setModelData('list', ['Item A', 'Item B', 'Item C', 'Item D', 'Item E', 'Item F', 'Item G', 'Item H']);
+        Heyer.setModelData('list', ['Item A', 'Item B', 'Item C', 'Item D', 'Item E', 'Item F', 'Item G']);
     },
 });
 ```
