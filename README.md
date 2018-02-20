@@ -34,7 +34,7 @@ Heyer({
         addItem: function () {
             var arr = Heyer.getModelData('list').value;
             var index = Heyer.getData('listIndex');
-            arr.push('Item ' + ++index);
+            arr.push('Item ' + (++index));
             Heyer.setModelData('list', arr);
             Heyer.setData('listIndex', index);
         }
